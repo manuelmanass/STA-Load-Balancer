@@ -15,7 +15,6 @@ export default class LoadBalancer {
 
     this.next=0;
     this.servers = Object.freeze([...servers]);
-    this.cola=0;
   }
   
   async onRequestArrival(request, sendToServer) {
@@ -25,30 +24,11 @@ export default class LoadBalancer {
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
-
-    let server=null;
-
-    if(this.servers[this.next].power===4){
-
-      server= this.servers[this.next];
-
-    }else if(this.servers[this.next].power===3 && this.cola<4){
-
-      server= this.servers[this.next];
-
-    }else if(this.servers[this.next].power==2 && this.cola<3){
-
-      server= this.servers[this.next];
-
-    }else if(this.servers[this.next].power===1 && this.cola<2){
-
-      server= this.servers[this.next];
-    }else{
-      server= this.servers[this.next];
-    }
-    this.cola++;
-    this.next = (this.next + 1) % this.servers.length;
-    if(this.cola==4){this.cola=0;}
+  
+    //enviar al que menos paquetes tenga en cola
+    const id = this.servers.findIndex(s => s.queuedRequests.length === Math.min(...this.servers.map(s => s.queuedRequests.length)));
+    const server = this.servers[id];
+   // this.next = (this.next+1) % this.servers.length;
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     return sendToServer(server.id);
   }
