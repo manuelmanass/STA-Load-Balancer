@@ -13,10 +13,11 @@ export default class LoadBalancer {
     // }
     // Los datos son de solo lectura y se actualizan durante la simulación.
 
-
+    this.next=0;
     this.servers = Object.freeze([...servers]);
+    this.cola=0;
   }
-
+  
   async onRequestArrival(request, sendToServer) {
     // Ejemplo de la petición que llega:
     // {
@@ -24,15 +25,33 @@ export default class LoadBalancer {
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
-    
-    let server = this.servers.find(s => s.activeRequest === null);
-     if (!server) {
-    server = this.servers[Math.floor(Math.random() * this.servers.length)];
-  }
-   
 
+    let server=null;
+
+    if(this.servers[this.next].power===4){
+
+      server= this.servers[this.next];
+
+    }else if(this.servers[this.next].power===3 && this.cola<4){
+
+      server= this.servers[this.next];
+
+    }else if(this.servers[this.next].power==2 && this.cola<3){
+
+      server= this.servers[this.next];
+
+    }else if(this.servers[this.next].power===1 && this.cola<2){
+
+      server= this.servers[this.next];
+    }else{
+      server= this.servers[this.next];
+    }
+    this.cola++;
+    this.next = (this.next + 1) % this.servers.length;
+    if(this.cola==4){this.cola=0;}
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     return sendToServer(server.id);
   }
 
 }
+
