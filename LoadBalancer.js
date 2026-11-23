@@ -24,16 +24,15 @@ export default class LoadBalancer {
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
-    for (let i=0; i < this.servers.length; i++) {
-
-      if (this.servers[i].activeRequest === null) {
-        const server = this.servers[i];
-    } else {
-      const server = this.servers[Math.floor(Math.random() * this.servers.length)];
-    }}
+    
+    let server = this.servers.find(s => s.activeRequest === null);
+     if (!server) {
+    server = this.servers[Math.floor(Math.random() * this.servers.length)];
+  }
    
 
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     return sendToServer(server.id);
   }
+
 }
